@@ -11,70 +11,74 @@ from prefect.client import Client
 from prefect.engine.result_handlers import LocalResultHandler
 from prefect.utilities.graphql import EnumValue, with_args
 
-cli = click.Group()
+_cli = click.Group()
 
 
-class DevCLI:
+class FlowCLI:
     def __init__(self, flow):
         if flow.result_handler == None:
             flow.result_handler = LocalResultHandler(dir=".prefect/results")
         self.flow = flow
 
     def run(self):
-        cli(obj=self.flow, auto_envvar_prefix="PREFECT_DEVCLI")
+        _cli(obj=self, auto_envvar_prefix="PREFECT_FLOWCLI")
 
 
-@cli.command(help="run your flow")
-@click.pass_context
-def run(ctx):
-    state = ctx.obj.run()
-    ctx.obj.save(fpath=os.path.abspath(".prefect/flow"))
+@_cli.command(help="run your flow")
+@click.pass_obj
+def run(obj):
+    state = obj.run()
+    obj.save(fpath=os.path.abspath(".prefect/flow"))
     with open(str(".prefect/state"), "wb") as f:
         cloudpickle.dump(state, f)
 
 
-@cli.command(help="show results from your flow")
-@click.pass_context
-def results(ctx):
+@_cli.command(help="show results from your flow")
+@click.pass_obj
+def results(obj):
     state = None
     with open(str(".prefect/state"), "rb") as f:
         state = cloudpickle.load(f)
 
-    # flow = self.load(fpath=os.path.abspath('.prefect/flow'))
     for task, value in state.result.items():
         print("Task: " + repr(task) + " : " + repr(value))
         print("Result: " + repr(value.result))
         print()
 
 
-@cli.command(help="register your flow with cloud")
+@_cli.command(help="register your flow with cloud")
 @click.option(
     "--project",
     required=True,
     help="the Prefect Cloud project to register your flow with",
 )
-@click.pass_context
-def register(ctx, project):
-    flow_id = ctx.obj.register(project_name=project)
+@click.pass_obj
+def register(obj, project):
+    return _register(obj, project)
+
+
+def _register(obj, project):
+    flow_id = obj.register(project_name=project)
     with open(str(".prefect/registration"), "wb") as f:
         cloudpickle.dump(flow_id, f)
     click.echo(flow_id)
     return flow_id
 
 
-@cli.command(help="run your flow in Prefect Cloud")
+@_cli.command(help="run your flow in Prefect Cloud with a local agent")
 @click.option(
     "--project",
     default=None,
     help="the Prefect Cloud project to register your flow with",
 )
 @click.option(
-    "--with-agent",
+    "--no-agent",
     default=False,
-    help="run an in-process agent to run Prefect Cloud flows",
+    is_flag=True,
+    help="don't run the agent (you will need to run one yourself)",
 )
-@click.pass_context
-def deploy(ctx, project, with_agent):
+@click.pass_obj
+def deploy(obj, project, no_agent):
     client = Client()
 
     flow_id = None
@@ -83,29 +87,35 @@ def deploy(ctx, project, with_agent):
             flow_id = cloudpickle.load(f)
 
     if not flow_id:
-        if not project:
+        if project is None:
             raise RuntimeError("need a project if not already deployed!")
 
-        flow_id = register(project)
+        click.echo("Registering Flow...")
+        flow_id = _register(obj, project=project)
+    else:
+        click.echo("Flow already registered")
 
-    proc = subprocess.Popen(
-        ["prefect", "agent", "start", "--show-flow-logs"],
-        stdout=sys.stdout,
-        stderr=subprocess.STDOUT,
-    )
+    if not no_agent:
+        proc = subprocess.Popen(
+            ["prefect", "agent", "start", "--show-flow-logs"],
+            stdout=sys.stdout,
+            stderr=subprocess.STDOUT,
+        )
 
-    click.echo("Starting Flow Run...")
-    flow_run_id = client.create_flow_run(flow_id=flow_id)
-    click.echo(flow_run_id)
+    try:
+        click.echo("Starting Flow Run...")
+        flow_run_id = client.create_flow_run(flow_id=flow_id)
+        click.echo(flow_run_id)
 
-    wait(flow_run_id)
-    click.echo("Terminating agent...")
-    proc.terminate()
+        wait(flow_run_id, show_state=no_agent)
+    finally:
+        if not no_agent:
+            click.echo("Terminating agent...")
+            proc.terminate()
 
 
-def wait(flow_run_id):
+def wait(flow_run_id, show_state=False):
     client = Client()
-    current_states = []
     while True:
         query = {
             "query": {
@@ -123,13 +133,9 @@ def wait(flow_run_id):
         # Filter through retrieved states and output in order
         for state_index in result.data.flow_run_by_pk.states:
             state = state_index.state
-            if state not in current_states:
-                if state != "Success" and state != "Failed":
-                    click.echo("{} -> ".format(state), nl=False)
-                else:
-                    click.echo(state)
-                    return
-
-                current_states.append(state)
+            if show_state:
+                print(state)
+            if state in ("Success", "Failed"):
+                return
 
         time.sleep(3)
