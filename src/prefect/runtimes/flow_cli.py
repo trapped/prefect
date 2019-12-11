@@ -5,7 +5,6 @@ import subprocess
 
 import click
 import cloudpickle
-from tabulate import tabulate
 
 from prefect.client import Client
 from prefect.engine.result_handlers import LocalResultHandler
@@ -27,8 +26,8 @@ class FlowCLI:
 @_cli.command(help="run your flow")
 @click.pass_obj
 def run(obj):
-    state = obj.run()
-    obj.save(fpath=os.path.abspath(".prefect/flow"))
+    state = obj.flow.run()
+    obj.flow.save(fpath=os.path.abspath(".prefect/flow"))
     with open(str(".prefect/state"), "wb") as f:
         cloudpickle.dump(state, f)
 
@@ -58,7 +57,7 @@ def register(obj, project):
 
 
 def _register(obj, project):
-    flow_id = obj.register(project_name=project)
+    flow_id = obj.flow.register(project_name=project)
     with open(str(".prefect/registration"), "wb") as f:
         cloudpickle.dump(flow_id, f)
     click.echo(flow_id)
