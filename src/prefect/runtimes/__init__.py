@@ -1,4 +1,5 @@
 from prefect.runtimes.flow_cli import FlowCLI
+from prefect.runtimes.make_cli import MakeCLI
 
 # Motivation for runtimes:
 

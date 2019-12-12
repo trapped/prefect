@@ -11,10 +11,14 @@ import cloudpickle
 
 from prefect.engine.result_handlers import ResultHandler
 
+# TODO: question: why is absolute path required?
+# TODO: we allow for overwrites it seems?
+# TODO: it would be nice to know the version of the flow run from the result object? (or similar information)
+
 
 class LocalResultHandler(ResultHandler):
     """
-    Hook for storing and retrieving task results from local file storage. Only intended to be used
+    Hook for storing and retrieving task results to and from local file storage. Only intended to be used
     for local testing and development. Task results are written using `cloudpickle` and stored in the
     provided location for use in future runs.
 
@@ -55,6 +59,7 @@ class LocalResultHandler(ResultHandler):
         Returns:
             - str: the _absolute_ path to the written result on disk
         """
+        raise RuntimeError("sure")
         fd, loc = tempfile.mkstemp(prefix="prefect-", dir=self.dir)
         self.logger.debug("Starting to upload result to {}...".format(loc))
         with open(fd, "wb") as f:
