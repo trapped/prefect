@@ -12,6 +12,74 @@ from prefect.utilities.graphql import EnumValue, with_args
 
 _cli = click.Group()
 
+# Example Usage
+"""
+# Client Code:
+
+    from prefect.runtimes import FlowCLI
+    ...
+    with prefect.Flow("example") as flow:
+        ...
+        runtime = FlowCLI(flow=flow)
+        runtime.run()
+
+
+
+From the shell you get a CLI wrapped around a flow object available:
+
+    $ python app.py --help             
+
+    Usage: app.py [OPTIONS] COMMAND [ARGS]...
+
+    Options:
+    --help  Show this message and exit.
+
+    Commands:
+    deploy    run your flow in Prefect Cloud
+    register  register your flow with cloud
+    results   show results from your flow
+    run       run your flow locally
+
+Usage:
+
+    $ python app.py run
+
+    [2019-12-18 14:58:21,635] INFO - prefect.FlowRunner | Beginning Flow run for 'example'
+    [2019-12-18 14:58:21,638] INFO - prefect.FlowRunner | Starting flow run.
+    ...
+    [2019-12-18 14:58:23,468] INFO - prefect.FlowRunner | Flow run SUCCESS: all reference tasks succeeded
+
+
+    $ python app.py register --project test
+    276dd070-d692-4c7f-b18a-051ca7f5c246
+
+
+    $ python app.py deploy
+
+    Starting Flow Run...
+    fe7546d9-49a5-42dc-8680-b42b5ff09cd7
+    ____            __           _        _                    _
+    |  _ \ _ __ ___ / _| ___  ___| |_     / \   __ _  ___ _ __ | |_
+    | |_) | '__/ _ \ |_ / _ \/ __| __|   / _ \ / _` |/ _ \ '_ \| __|
+    |  __/| | |  __/  _|  __/ (__| |_   / ___ \ (_| |  __/ | | | |_
+    |_|   |_|  \___|_|  \___|\___|\__| /_/   \_\__, |\___|_| |_|\__|
+                                            |___/
+    [2019-12-11 04:31:29,027] INFO - agent | Starting LocalAgent with labels ['alexs-mbp.lan', 's3-flow-storage', 'gcs-flow-storage']
+    [2019-12-11 04:31:29,027] INFO - agent | Agent documentation can be found at https://docs.prefect.io/cloud/
+    [2019-12-11 04:31:29,174] INFO - agent | Agent successfully connected to Prefect Cloud
+    [2019-12-11 04:31:29,174] INFO - agent | Waiting for flow runs...
+    [2019-12-11 04:31:29,571] INFO - agent | Found 1 flow run(s) to submit for execution.
+    [2019-12-11 04:31:29,770] INFO - agent | Deploying flow run fe7546d9-49a5-42dc-8680-b42b5ff09cd7
+    [2019-12-11 04:31:29,776] INFO - agent | Submitted 1 flow run(s) for execution.
+    [2019-12-11 04:31:31,742] INFO - prefect.CloudFlowRunner | Beginning Flow run for 'example'
+    [2019-12-11 04:31:32,268] INFO - prefect.CloudFlowRunner | Starting flow run.
+    ...
+    [2019-12-11 04:31:39,605] INFO - prefect.CloudFlowRunner | Flow run SUCCESS: all reference tasks succeeded
+    Success!
+    Terminating agent... 
+
+"""
+
 
 class FlowCLI:
     def __init__(self, flow):

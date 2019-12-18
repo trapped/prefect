@@ -59,7 +59,6 @@ class LocalResultHandler(ResultHandler):
         Returns:
             - str: the _absolute_ path to the written result on disk
         """
-        raise RuntimeError("sure")
         fd, loc = tempfile.mkstemp(prefix="prefect-", dir=self.dir)
         self.logger.debug("Starting to upload result to {}...".format(loc))
         with open(fd, "wb") as f:
