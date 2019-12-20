@@ -1,5 +1,6 @@
 import atexit
 import os
+import inspect
 import sys
 import time
 import subprocess
@@ -73,11 +74,34 @@ Alternative static import:
 Upside: no need to make an instance
 Downside: changing behavior cannot be done through a constructor and initialization would have to be done via module tricks. This may be surprising to users, thus, a downside.
 
+
+
+Implied Task Ordering:
+
+    make = MakeCLI(implied_order=True)
+
+    @make.task
+    def task1():
+        print(1)
+
+    @make.task
+    def task2():
+        print(2)
+
+    @make.task
+    def task3():
+        print(3)
+
+
+Automatically builds flow dependencies:
+
+    1 ---> 2 ---> 3
+
 """
 
 
 class MakeCLI:
-    def __init__(self):
+    def __init__(self, implied_order=False):
         self.flow = prefect.Flow(
             "make", result_handler=LocalResultHandler(dir=".prefect/results")
         )
@@ -85,14 +109,26 @@ class MakeCLI:
 
         self.dependencies = {}
         self.tasks = {}
+        self.task_order = []
+        self.implied_order = implied_order
 
     @curry
     def task(self, fn, depends=None, **kwargs):
         t = prefect.tasks.core.function.FunctionTask(fn=fn, **kwargs)
-        # TODO: should be allowed to use task name too (or instead?)
-        self.tasks[fn.__name__] = t
+
         if isinstance(depends, list):
             self.dependencies[t] = depends
+        else:
+            self.dependencies[t] = []
+
+        if self.implied_order:
+            if len(self.task_order) > 0:
+                self.dependencies[t].append(self.task_order[-1])
+
+        # TODO: should be allowed to use task name too (or instead?)
+        self.tasks[fn.__name__] = t
+        self.task_order.append(fn.__name__)
+
         return t
 
     def run(self):
@@ -170,29 +206,43 @@ _cli = click.Group()
 
 @_cli.command(help="run a single task from your flow (with dependencies)")
 # @click.option("--cloud", required=False, is_flag=True, help="schedule step with Cloud")
-# @click.option(
-#     "--no-dependencies",
-#     required=True,
-#     is_flag=True,
-#     help="ignore task dependencies (may not function)",
-# )
+@click.option(
+    "--no-dependencies",
+    "-n",
+    required=False,
+    is_flag=True,
+    help="ignore task dependencies (may not function)",
+)
 @click.argument("tasks", nargs=-1)
 @click.pass_obj
-def run(obj, tasks):
+def run(obj, tasks, no_dependencies):
     # build the flow according to what tasks should be run
 
     if len(tasks) == 0:
         tasks = obj.tasks.keys()
 
-    # TODO: include deps of deps recursively
+    # TODO: account for task parameters via the CLI and results from previous runs being reused in a single task
 
+    # we will add all listed dependencies, including cycles, which flow objects will detect naturally
     for task_name, t in obj.tasks.items():
+
+        # IDEA: we can generate parameters from the argspec of the run function for each task
+        # print(inspect.getfullargspec(t.run))
         if task_name in tasks:
-            deps = obj.dependencies.get(t)
-            if deps:
-                dep_objs = [obj.tasks[t_n] for t_n in deps]
-                obj.flow.set_dependencies(t, upstream_tasks=dep_objs)
-            else:
-                obj.flow.add_task(t)
+            to_visit = [t]
+            # prevent a potential infinite loop while adding dependencies
+            alredy_fetched_deps_for = set()
+            while to_visit:
+                current_t = to_visit.pop()
+                deps = obj.dependencies.get(current_t)
+                if deps and not no_dependencies:
+                    if current_t in alredy_fetched_deps_for:
+                        continue
+                    alredy_fetched_deps_for.add(current_t)
+                    dep_objs = [obj.tasks[t_n] for t_n in deps]
+                    to_visit.extend(dep_objs)
+                    obj.flow.set_dependencies(current_t, upstream_tasks=dep_objs)
+                else:
+                    obj.flow.add_task(current_t)
 
     obj.flow.run()
