@@ -100,6 +100,9 @@ Automatically builds flow dependencies:
 """
 
 
+# TODO: add "default" task, where if no task name is provided, then the default is run (like 'make all' -> 'make')
+
+
 class MakeCLI:
     def __init__(self, implied_order=False):
         self.flow = prefect.Flow(
