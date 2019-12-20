@@ -19,6 +19,7 @@ from typing import (
 )
 
 import pendulum
+from slugify import slugify
 
 import prefect
 from prefect import config
@@ -856,6 +857,8 @@ class TaskRunner(Runner):
 
             raise ENDRUN(state)
 
+        result_key = slugify(prefect.context.get("task_full_name", self.task.name))
+
         try:
             self.logger.debug(
                 "Task '{name}': Calling task.run() method...".format(
@@ -888,14 +891,18 @@ class TaskRunner(Runner):
             new_state = exc.state
             assert isinstance(new_state, Looped)
             new_state.result = Result(
-                value=new_state.result, result_handler=self.result_handler
+                key=result_key,
+                value=new_state.result,
+                result_handler=self.result_handler,
             )
             new_state.message = exc.state.message or "Task is looping ({})".format(
                 new_state.loop_count
             )
             return new_state
 
-        result = Result(value=result, result_handler=self.result_handler)
+        result = Result(
+            key=result_key, value=result, result_handler=self.result_handler
+        )
         state = Success(result=result, message="Task run succeeded.")
 
         ## only checkpoint tasks if checkpointing is turned on
@@ -964,12 +971,17 @@ class TaskRunner(Runner):
         if state.is_failed():
             run_count = prefect.context.get("task_run_count", 1)
             if prefect.context.get("task_loop_count") is not None:
+                result_key = "{}:{}".format(
+                    slugify(prefect.context.get("task_full_name", self.task.name)),
+                    run_count,
+                )
                 loop_context = {
                     "_loop_count": Result(
                         value=prefect.context["task_loop_count"],
                         result_handler=JSONResultHandler(),
                     ),
                     "_loop_result": Result(
+                        key=result_key,
                         value=prefect.context.get("task_loop_result"),
                         result_handler=self.result_handler,
                     ),
