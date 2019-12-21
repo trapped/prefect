@@ -106,7 +106,8 @@ Automatically builds flow dependencies:
 class MakeCLI:
     def __init__(self, implied_order=False):
         self.flow = prefect.Flow(
-            "make", result_handler=LocalResultHandler(dir=".prefect/results")
+            name="make",
+            #  result_handler=LocalResultHandler(dir=".prefect/results"),
         )
         atexit.register(self.run)
 
@@ -114,10 +115,16 @@ class MakeCLI:
         self.tasks = {}
         self.task_order = []
         self.implied_order = implied_order
+        self.default = None
 
     @curry
-    def task(self, fn, depends=None, **kwargs):
+    def task(self, fn, default=False, depends=None, **kwargs):
         t = prefect.tasks.core.function.FunctionTask(fn=fn, **kwargs)
+
+        if default:
+            if self.default:
+                raise RuntimeError("There can only be one default task")
+            self.default = fn.__name__
 
         if isinstance(depends, list):
             self.dependencies[t] = depends
@@ -138,73 +145,13 @@ class MakeCLI:
         _cli(obj=self, auto_envvar_prefix="PREFECT_MAKECLI")
 
 
-## NO COMMANDS
-
-# class DefaultCommandGroup(click.Group):
-#     """allow a default command for a group"""
-
-#     def command(self, *args, **kwargs):
-#         default_command = kwargs.pop('default_command', False)
-#         if default_command and not args:
-#             kwargs['name'] = kwargs.get('name', '<>')
-#         decorator = super(
-#             DefaultCommandGroup, self).command(*args, **kwargs)
-
-#         if default_command:
-#             def new_decorator(f):
-#                 cmd = decorator(f)
-#                 self.default_command = cmd.name
-#                 return cmd
-
-#             return new_decorator
-
-#         return decorator
-
-#     def resolve_command(self, ctx, args):
-#         try:
-#             # test if the command parses
-#             return super(
-#                 DefaultCommandGroup, self).resolve_command(ctx, args)
-#         except click.UsageError:
-#             # command did not parse, assume it is the default command
-#             args.insert(0, self.default_command)
-#             return super(
-#                 DefaultCommandGroup, self).resolve_command(ctx, args)
-
-# @click.group(cls=DefaultCommandGroup, help="run a one or more tasks from your flow")
-# @click.pass_obj
-# def cli(obj):
-#     pass
-
-
-# @cli.command(default_command=True)
-# # @click.option("--cloud", required=False, is_flag=True, help="schedule step with Cloud")
-# # @click.option(
-# #     "--no-dependencies",
-# #     required=True,
-# #     is_flag=True,
-# #     help="ignore task dependencies (may not function)",
-# # )
-# @click.argument("tasks", nargs=-1, required=True)
-# @click.pass_obj
-# def cli(obj, tasks):
-
-#     # build the flow according to what tasks should be run
-#     for task_name, t  in obj.tasks.items():
-#         if task_name in tasks:
-#             deps = obj.dependencies.get(t)
-#             if deps:
-#                 dep_objs = [obj.tasks[t_n] for t_n in deps]
-#                 obj.flow.set_dependencies(t, upstream_tasks=dep_objs)
-#             else:
-#                 obj.flow.add_task(t)
-
-#     obj.flow.run()
-
-
-# WITH COMMANDS
-
-_cli = click.Group()
+@click.group(invoke_without_command=True)
+@click.pass_obj
+@click.pass_context
+def _cli(ctx, obj):
+    # TODO: auto click commands from the available tasks?
+    if ctx.invoked_subcommand is None:
+        print("nice")
 
 
 @_cli.command(help="run a single task from your flow (with dependencies)")
@@ -222,7 +169,10 @@ def run(obj, tasks, no_dependencies):
     # build the flow according to what tasks should be run
 
     if len(tasks) == 0:
-        tasks = obj.tasks.keys()
+        if obj.default != None:
+            tasks = [obj.default]
+        else:
+            tasks = obj.tasks.keys()
 
     # TODO: account for task parameters via the CLI and results from previous runs being reused in a single task
 
@@ -234,14 +184,14 @@ def run(obj, tasks, no_dependencies):
         if task_name in tasks:
             to_visit = [t]
             # prevent a potential infinite loop while adding dependencies
-            alredy_fetched_deps_for = set()
+            already_fetched_deps_for = set()
             while to_visit:
                 current_t = to_visit.pop()
                 deps = obj.dependencies.get(current_t)
                 if deps and not no_dependencies:
-                    if current_t in alredy_fetched_deps_for:
+                    if current_t in already_fetched_deps_for:
                         continue
-                    alredy_fetched_deps_for.add(current_t)
+                    already_fetched_deps_for.add(current_t)
                     dep_objs = [obj.tasks[t_n] for t_n in deps]
                     to_visit.extend(dep_objs)
                     obj.flow.set_dependencies(current_t, upstream_tasks=dep_objs)
