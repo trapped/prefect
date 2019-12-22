@@ -21,7 +21,7 @@ class ResultHandler:
     def __repr__(self) -> str:
         return "<ResultHandler: {}>".format(type(self).__name__)
 
-    def write(self, result: Any, key: str = None) -> Any:
+    def write(self, result: Any) -> Any:
         return result
 
     def read(self, loc: str) -> str:

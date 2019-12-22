@@ -74,11 +74,8 @@ class Result(ResultInterface):
             when storing / serializing this result's value; required if you intend on persisting this result in some way
     """
 
-    def __init__(
-        self, value: Any, result_handler: ResultHandler = None, key: str = None
-    ):
+    def __init__(self, value: Any, result_handler: ResultHandler = None):
         self.value = value
-        self.key = key
         self.safe_value = NoResult  # type: SafeResult
         self.result_handler = result_handler  # type: ignore
 
@@ -90,7 +87,7 @@ class Result(ResultInterface):
             assert isinstance(
                 self.result_handler, ResultHandler
             ), "Result has no ResultHandler"  # mypy assert
-            value = self.result_handler.write(key=self.key, result=self.value)
+            value = self.result_handler.write(self.value)
             self.safe_value = SafeResult(
                 value=value, result_handler=self.result_handler
             )
@@ -106,9 +103,8 @@ class SafeResult(ResultInterface):
         - result_handler (ResultHandler): the result handler to use when reading this result's value
     """
 
-    def __init__(self, value: Any, result_handler: ResultHandler, key: str = None):
+    def __init__(self, value: Any, result_handler: ResultHandler):
         self.value = value
-        self.key = key
         self.result_handler = result_handler
 
     @property
@@ -130,7 +126,7 @@ class SafeResult(ResultInterface):
         if result_handler is not None:
             self.result_handler = result_handler
         value = self.result_handler.read(self.value)
-        res = Result(key=self.key, value=value, result_handler=self.result_handler)
+        res = Result(value=value, result_handler=self.result_handler)
         res.safe_value = self
         return res
 
