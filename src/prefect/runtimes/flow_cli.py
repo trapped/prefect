@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import subprocess
+import pathlib
 
 import click
 import cloudpickle
@@ -63,7 +64,7 @@ Usage:
     | |_) | '__/ _ \ |_ / _ \/ __| __|   / _ \ / _` |/ _ \ '_ \| __|
     |  __/| | |  __/  _|  __/ (__| |_   / ___ \ (_| |  __/ | | | |_
     |_|   |_|  \___|_|  \___|\___|\__| /_/   \_\__, |\___|_| |_|\__|
-                                            |___/
+                                                |___/
     [2019-12-11 04:31:29,027] INFO - agent | Starting LocalAgent with labels ['alexs-mbp.lan', 's3-flow-storage', 'gcs-flow-storage']
     [2019-12-11 04:31:29,027] INFO - agent | Agent documentation can be found at https://docs.prefect.io/cloud/
     [2019-12-11 04:31:29,174] INFO - agent | Agent successfully connected to Prefect Cloud
@@ -82,10 +83,30 @@ Usage:
 
 
 class FlowCLI:
-    def __init__(self, flow):
-        if flow.result_handler == None:
-            flow.result_handler = LocalResultHandler(dir=".prefect/results")
+    def __init__(self, flow: "prefect.Flow", dir: str = ".prefect") -> None:
+        if flow.result_handler:
+            raise RuntimeError("flow already has a result handler")
+        flow.result_handler = LocalResultHandler(dir=dir)
+
+        self.root_dir = pathlib.Path(dir)
         self.flow = flow
+
+        self._prep_storage()
+
+    @property
+    def result_dir(self) -> "pathlib.Path":
+        return self.root_dir / "result"
+
+    def run_dir(self) -> "pathlib.Path":
+        return self.root_dir / "run"
+
+    def _prep_storage(self) -> None:
+        self.root_dir.mkdir(parents=True)
+        self.result_dir.mkdir(parents=True)
+        self.run_dir.mkdir(parents=True)
+
+    def _get_next_run_id(self):
+        pass
 
     def run(self):
         _cli(obj=self, auto_envvar_prefix="PREFECT_FLOWCLI")
