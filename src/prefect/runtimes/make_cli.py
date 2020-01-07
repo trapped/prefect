@@ -154,6 +154,19 @@ def _cli(ctx, obj):
         print("nice")
 
 
+def get_parameters(fn):
+    argspec = inspect.getfullargspec(fn)
+    args = argspec.args[:]
+    parameters = []
+    if argspec.defaults:
+        for default_value in argspec.defaults:
+            arg = args.pop()
+            parameter = prefect.Parameter(arg, default=default_value)
+            parameters.append(parameter)
+    parameters.extend([prefect.Parameter(arg) for arg in args])
+    return parameters
+
+
 @_cli.command(help="run a single task from your flow (with dependencies)")
 # @click.option("--cloud", required=False, is_flag=True, help="schedule step with Cloud")
 @click.option(
@@ -177,10 +190,13 @@ def run(obj, tasks, no_dependencies):
     # TODO: account for task parameters via the CLI and results from previous runs being reused in a single task
 
     # we will add all listed dependencies, including cycles, which flow objects will detect naturally
+    parameters = []
     for task_name, t in obj.tasks.items():
 
         # IDEA: we can generate parameters from the argspec of the run function for each task
-        # print(inspect.getfullargspec(t.run))
+        # task_parameters = get_parameters(t.run)
+        # parameters.extend(task_parameters)
+
         if task_name in tasks:
             to_visit = [t]
             # prevent a potential infinite loop while adding dependencies
@@ -198,4 +214,4 @@ def run(obj, tasks, no_dependencies):
                 else:
                     obj.flow.add_task(current_t)
 
-    obj.flow.run()
+    obj.flow.run(parameters=parameters)
