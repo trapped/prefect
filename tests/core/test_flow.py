@@ -133,23 +133,18 @@ class TestCreateFlow:
         assert isinstance(f.result_handler, ResultHandler)
         assert isinstance(f.result_handler, LocalResultHandler)
 
+    def test_create_flow_without_result_handler_uses_config(self):
+        with set_temporary_config(
+            {
+                "engine.result_handler.default_class": "prefect.engine.result_handlers.local_result_handler.LocalResultHandler"
+            }
+        ):
+            f = Flow(name="test")
+            assert isinstance(f.result_handler, LocalResultHandler)
+
     def test_create_flow_with_storage(self):
         f2 = Flow(name="test", storage=prefect.environments.storage.Memory())
         assert isinstance(f2.storage, prefect.environments.storage.Memory)
-        assert isinstance(f2.result_handler, ResultHandler)
-        assert f2.result_handler == f2.storage.result_handler
-
-    def test_create_flow_with_storage_and_result_handler(self):
-        handler = LocalResultHandler(dir="/")
-        f2 = Flow(
-            name="test",
-            storage=prefect.environments.storage.Memory(),
-            result_handler=handler,
-        )
-        assert isinstance(f2.storage, prefect.environments.storage.Memory)
-        assert isinstance(f2.result_handler, ResultHandler)
-        assert f2.result_handler != f2.storage.result_handler
-        assert f2.result_handler == handler
 
     def test_create_flow_with_environment(self):
         f2 = Flow(name="test", environment=prefect.environments.RemoteEnvironment())
@@ -2230,58 +2225,22 @@ class TestFlowRegister:
         assert f.storage.image_tag == "BIG"
         assert f.environment.labels == set()
 
-    @pytest.mark.parametrize(
-        "storage",
-        [
-            prefect.environments.storage.Local(),
-            prefect.environments.storage.S3(bucket="blah"),
-            prefect.environments.storage.GCS(bucket="test"),
-            prefect.environments.storage.Azure(container="windows"),
-        ],
-    )
-    def test_flow_register_auto_labels_environment_if_labeled_storage_used(
-        self, monkeypatch, storage
+    def test_flow_register_auto_labels_environment_if_local_storage_used(
+        self, monkeypatch
     ):
         monkeypatch.setattr("prefect.Client", MagicMock())
-        f = Flow(name="Test me!! I should get labeled", storage=storage)
+        f = Flow(name="Test me!! I should get labeled")
 
-        f.register("My-project", build=False)
+        assert f.storage is None
+        with set_temporary_config(
+            {
+                "flows.defaults.storage.default_class": "prefect.environments.storage.Local"
+            }
+        ):
+            f.register("My-project")
 
-        assert len(f.environment.labels) == 1
-
-    @pytest.mark.parametrize(
-        "storage",
-        [
-            prefect.environments.storage.Local(),
-            prefect.environments.storage.S3(bucket="blah"),
-            prefect.environments.storage.GCS(bucket="test"),
-            prefect.environments.storage.Azure(container="windows"),
-        ],
-    )
-    def test_flow_register_auto_sets_result_handler_if_storage_has_default(
-        self, monkeypatch, storage
-    ):
-        monkeypatch.setattr("prefect.Client", MagicMock())
-        f = Flow(name="Test me!! I should get labeled", storage=storage)
-        assert isinstance(f.result_handler, ResultHandler)
-        assert f.result_handler == storage.result_handler
-
-        f.result_handler = None
-        f.register("My-project", build=False)
-        assert isinstance(f.result_handler, ResultHandler)
-        assert f.result_handler == storage.result_handler
-
-    def test_flow_register_doesnt_override_custom_set_handler(self, monkeypatch):
-        monkeypatch.setattr("prefect.Client", MagicMock())
-        f = Flow(
-            name="Test me!! I should get labeled",
-            storage=prefect.environments.storage.S3(bucket="t"),
-            result_handler=LocalResultHandler(),
-        )
-        assert isinstance(f.result_handler, LocalResultHandler)
-
-        f.register("My-project", build=False)
-        assert isinstance(f.result_handler, LocalResultHandler)
+        assert isinstance(f.storage, prefect.environments.storage.Local)
+        assert len(f.environment.labels) == 1  # for hostname
 
     def test_flow_register_auto_labels_environment_with_storage_labels(
         self, monkeypatch

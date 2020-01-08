@@ -1,6 +1,5 @@
 from unittest.mock import MagicMock, patch
 
-import os
 import pytest
 
 import prefect
@@ -112,28 +111,27 @@ class TestLocalResultHandler:
         serialized = ResultHandlerSchema().dump(LocalResultHandler())
         assert isinstance(serialized, dict)
         assert serialized["type"] == "LocalResultHandler"
-        assert serialized["dir"]
+        assert serialized["dir"] is None
 
     def test_deserialize_from_dict(self):
         handler = ResultHandlerSchema().load({"type": "LocalResultHandler"})
         assert isinstance(handler, LocalResultHandler)
-        assert handler.dir
+        assert handler.dir is None
 
     def test_serialize_local_result_handler_with_dir(self):
-        root_dir = os.path.abspath(os.sep)
-        serialized = ResultHandlerSchema().dump(LocalResultHandler(dir=root_dir))
+        serialized = ResultHandlerSchema().dump(LocalResultHandler(dir="/root/prefect"))
         assert isinstance(serialized, dict)
         assert serialized["type"] == "LocalResultHandler"
-        assert serialized["dir"] == root_dir
+        assert serialized["dir"] == "/root/prefect"
 
-    def test_deserialize_local_result_handler(self):
+    @pytest.mark.parametrize("dir", [None, "/root/prefect"])
+    def test_deserialize_local_result_handler(self, dir):
         schema = ResultHandlerSchema()
-        root_dir = os.path.abspath(os.sep)
-        obj = schema.load(schema.dump(LocalResultHandler(dir=root_dir)))
+        obj = schema.load(schema.dump(LocalResultHandler(dir=dir)))
         assert isinstance(obj, LocalResultHandler)
         assert hasattr(obj, "logger")
         assert obj.logger.name == "prefect.LocalResultHandler"
-        assert obj.dir == root_dir
+        assert obj.dir == dir
 
 
 @pytest.mark.xfail(raises=ImportError, reason="google extras not installed.")
@@ -151,19 +149,7 @@ class TestGCSResultHandler:
         )
         assert isinstance(handler, GCSResultHandler)
         assert handler.bucket == "foo-bar"
-        assert handler.credentials_secret is None
-
-    def test_deserialize_from_dict_with_creds(self):
-        handler = ResultHandlerSchema().load(
-            {
-                "type": "GCSResultHandler",
-                "bucket": "foo-bar",
-                "credentials_secret": "FOO",
-            }
-        )
-        assert isinstance(handler, GCSResultHandler)
-        assert handler.bucket == "foo-bar"
-        assert handler.credentials_secret == "FOO"
+        assert handler.credentials_secret == "GOOGLE_APPLICATION_CREDENTIALS"
 
     def test_roundtrip(self):
         schema = ResultHandlerSchema()

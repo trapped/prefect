@@ -91,7 +91,11 @@ class TaskRunner(Runner):
     ):
         self.context = prefect.context.to_dict()
         self.task = task
-        self.result_handler = task.result_handler or result_handler
+        self.result_handler = (
+            task.result_handler
+            or result_handler
+            or prefect.engine.get_default_result_handler_class()()
+        )
         super().__init__(state_handlers=state_handlers)
 
     def __repr__(self) -> str:
