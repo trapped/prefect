@@ -6,9 +6,19 @@ import requests
 from .position import Area
 
 
-def fetch_aircraft(area=None):
-    options = {"time": 0}
+def _api_request_json(req, options=None):
+    response = requests.get(
+        "https://opensky-network.org/api/{}".format(req),
+        auth=(),
+        params=options or {},
+        timeout=5.00,
+    )
+    response.raise_for_status()
+    return response.json()
 
+
+def fetch_aircraft(area=None):
+    options = {}
     if area != None:
         if isinstance(area, Area):
             area.validate()
@@ -21,11 +31,4 @@ def fetch_aircraft(area=None):
         else:
             raise ValueError("Bad area given")
 
-    response = requests.get(
-        "https://opensky-network.org/api/states/all",
-        auth=(),
-        params=options,
-        timeout=15.00,
-    )
-    response.raise_for_status()
-    return response.json()
+    return _api_request_json("states/all", options=options)
