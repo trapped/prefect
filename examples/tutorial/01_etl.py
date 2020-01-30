@@ -5,10 +5,7 @@ from aircraftlib import (
     Database,
     clean_vector,
     add_airline_info,
-    fetch_airlines,
-    fetch_routes,
-    fetch_equipment,
-    fetch_airports,
+    fetch_reference_data,
 )
 
 # pull data, store to DB
@@ -32,44 +29,33 @@ from aircraftlib import (
 
 
 def main():
-    # Fetch starting location based on airport (parameterize)
-    # TODO: fetch position from reference data
+    # Get the live AC vector data around Dulles airport
     dulles_airport_position = Position(lat=38.9519444444, long=-77.4480555556)
-
-    # Get the live AC vector data around this airport
     radius_km = 200
     area_surrounding_dulles = surrounding_area(dulles_airport_position, radius_km)
-    # area_surrounding_dulles = None
 
-    # Fetch the data
     print("fetching reference data...")
-    airlines_ref_data = fetch_airlines()
-    airports_ref_data = fetch_airports()
-    route_ref_data = fetch_routes()
-    equipment_ref_data = fetch_equipment()
+    ref_data = fetch_reference_data()
 
     print("fetching live aircraft vectors...")
-    raw_ac_vectors = fetch_aircraft_vectors(
-        area=area_surrounding_dulles
-    )  # , offline=True)
+    raw_aircraft_vectors = fetch_aircraft_vectors(area=area_surrounding_dulles)
 
     print("cleaning & transform vectors...")
-    transformed_vectors = []
-    for raw_vector in raw_ac_vectors["states"]:
+    aircraft_vectors = []
+    for raw_vector in raw_aircraft_vectors["states"]:
         vector = clean_vector(raw_vector)
         if vector:
-            add_airline_info(vector, airlines_ref_data)
-            transformed_vectors.append(vector)
+            add_airline_info(vector, ref_data.airlines)
+            aircraft_vectors.append(vector)
 
     print("saving vectors...")
     db = Database()
-    db.add_aircraft_vectors(transformed_vectors)
+    db.add_aircraft_vectors(aircraft_vectors)
 
     print("saving reference data...")
-    db.update_airlines(airlines_ref_data)
-    db.update_airports(airports_ref_data)
-    db.update_routes(route_ref_data)
-    db.update_equipment(equipment_ref_data)
+    db.update_reference_data(ref_data)
+
+    print("complete!")
 
 
 if __name__ == "__main__":

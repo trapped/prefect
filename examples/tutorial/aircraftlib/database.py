@@ -5,6 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from .openflights import OpenFlightsData
 
 Base = declarative_base()
 
@@ -126,3 +127,8 @@ class Database:
             objects.append(Route(**route))
         self.session.bulk_save_objects(objects)
         self.session.commit()
+
+    def update_reference_data(self, ref_data: OpenFlightsData) -> None:
+        self.update_routes(ref_data.routes)
+        self.update_airports(ref_data.airports)
+        self.update_airlines(ref_data.airlines)

@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import os
 import json
 import pathlib
+import struct
+import binascii
 from typing import Dict, Any, Optional
 
 import requests
@@ -61,9 +64,36 @@ def _api_request_json(req: str, options: Dict[str, Any] = None) -> Dict[str, Any
     return response.json()
 
 
+def _capture_path(area: Area = None) -> str:
+    postfix = ""
+    if area:
+        # a stable postfix based on the area input
+        postfix = "-%s" % binascii.b2a_base64(
+            struct.pack("q", hash(area.bounding_box)), newline=False
+        ).decode("utf-8").replace("/", "-")
+
+    return (
+        pathlib.Path(__file__).parent.absolute()
+        / "data"
+        / "opensky"
+        / "capture{}.json".format(postfix)
+    )
+
+
+FAILURE_COUNT = 0
+
+
 def fetch_aircraft_vectors(
-    area: Area = None, offline: bool = False, capture: bool = False
+    area: Area = None,
+    offline: bool = True,
+    capture: bool = True,
+    simulate_failures: int = 0,
 ) -> Dict[str, Any]:
+    global FAILURE_COUNT
+    if FAILURE_COUNT < simulate_failures:
+        FAILURE_COUNT += 1
+        raise RuntimeError("HTTP Timeout!")
+
     options = {}
     if area != None:
         if isinstance(area, Area):
@@ -77,11 +107,9 @@ def fetch_aircraft_vectors(
         else:
             raise ValueError("Bad area given")
 
-    capture_path = (
-        pathlib.Path(__file__).parent.absolute() / "data" / "opensky" / "capture.json"
-    )
+    capture_path = _capture_path(area)
 
-    if offline:
+    if offline and os.path.exists(capture_path):
         with open(capture_path, "r") as capture_file:
             return json.load(capture_file)
 

@@ -50,3 +50,12 @@ def fetch_airports() -> Dict[str, Dict[str, Any]]:
             result[airport_id] = dict(row)
 
     return result
+
+
+OpenFlightsData = collections.namedtuple("OpenFlightsData", "routes airlines airports")
+
+
+def fetch_reference_data() -> OpenFlightsData:
+    return OpenFlightsData(
+        routes=fetch_routes(), airlines=fetch_airlines(), airports=fetch_airports()
+    )
