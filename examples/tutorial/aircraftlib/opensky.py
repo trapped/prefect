@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import calendar
+import json
+import pathlib
+from typing import Dict, Any, Optional
+
 import requests
 
 from .position import Area
@@ -47,18 +50,20 @@ AIRCRAFT_VECTOR_FIELDS = (
 )
 
 
-def _api_request_json(req, options=None):
+def _api_request_json(req: str, options: Dict[str, Any] = None) -> Dict[str, Any]:
     response = requests.get(
         "https://opensky-network.org/api/{}".format(req),
         auth=(),
         params=options or {},
-        timeout=5.00,
+        timeout=10.00,
     )
     response.raise_for_status()
     return response.json()
 
 
-def fetch_aircraft_vectors(area=None):
+def fetch_aircraft_vectors(
+    area: Area = None, offline: bool = False, capture: bool = False
+) -> Dict[str, Any]:
     options = {}
     if area != None:
         if isinstance(area, Area):
@@ -72,4 +77,17 @@ def fetch_aircraft_vectors(area=None):
         else:
             raise ValueError("Bad area given")
 
-    return _api_request_json("states/all", options=options)
+    capture_path = (
+        pathlib.Path(__file__).parent.absolute() / "data" / "opensky" / "capture.json"
+    )
+
+    if offline:
+        with open(capture_path, "r") as capture_file:
+            return json.load(capture_file)
+
+    result = _api_request_json("states/all", options=options)
+    if capture:
+        with open(capture_path, "w") as capture_file:
+            json.dump(result, capture_file)
+
+    return result

@@ -1,4 +1,4 @@
-# airport-id	latitude	longitude	airport-name
+airport-id	latitude	longitude	airport-name
 AAA	-17.3542	-145.4961	Anaa                                    
 AAC	31.0733	33.8358	EL-ARISH
 AAE	36.8222	7.8094	,Annaba                                  
@@ -677,7 +677,7 @@ BYM	20.3972	-76.6175	Bayamo
 BYN	46.1633	100.7041	Bayankhongor                            
 BYO	-21.2294	-56.4561	Bonito               
 BYP	-22.4026	119.0958	Barimunya                   
-BYR	57.2772	11.0001	  Læs?
+BYR	57.2772	11.0001	  Lï¿½s?
 BYU	49.9844	11.6386	BAYREUTH
 BZB	-18.7167	36.3333	Bazaruto Island
 BZC	-22.7656	-41.9650	BUZIOS/UMBERTO MODIANO
@@ -1319,7 +1319,7 @@ EPA	-34.3636	-58.3645	El Palomar
 EPH	47.3075	-119.5158	EPHRATA MUNI
 EPL	48.3250	6.0667	Epinal
 EPR	-33.6858	121.8211	Esperance
-EPU	58.4190	24.4728	Pärnu
+EPU	58.4190	24.4728	Pï¿½rnu
 EQS	-42.9333	-71.1442	Esquel
 ERC	39.7131	39.5206	Erzincan                                
 ERF	50.9797	10.9581	Erfurt                                  
@@ -1758,7 +1758,7 @@ HDS	-24.3546	31.0504	Hoedspruit
 HDY	6.9328	100.3950	Hat Yai                                 
 HEA	34.2161	62.2264	Herat                                   
 HEH	20.7433	96.7930	Heho                                    
-HEI	54.1550	8.9033	  Heide-Büsum
+HEI	54.1550	8.9033	  Heide-Bï¿½sum
 HEK	50.2500	127.3000	Heihe
 HEL	60.3172	24.9633	Helsinki-Vantaa
 HEM	60.2539	25.0442	HELSINKI/MALMI
@@ -2651,7 +2651,7 @@ LFW	6.1658	1.2542	Lome
 LGA	40.7773	-73.8727	New York La Guardia Apt
 LGB	33.8177	-118.1516	Long Beach Apt                          
 LGC	33.0089	-85.0726	LA GRANGE-CALLAWAY
-LGG	50.6364	5.4428	Liège
+LGG	50.6364	5.4428	Liï¿½ge
 LGH	-30.5983	138.4250	LEIGH CREEK
 LGI	23.1790	-75.0936	Deadmans Cay
 LGK	6.3261	99.7247	Langkawi
@@ -3443,7 +3443,7 @@ OBX	-7.5830	141.3170	  Obo
 OBY	70.4850	-21.9806	Ittoqqortoormiit
 OCC	-0.4606	-76.9881	Coca                
 OCM	-22.3223	117.1631	Boolgeeda                     
-OCV	8.3151	-73.3583	  Ocaña
+OCV	8.3151	-73.3583	  Ocaï¿½a
 ODB	37.8420	-4.8489	CORDOBA
 ODE	55.4767	10.3309	ODENSE
 ODH	51.2336	-0.9414	ODIHAM
@@ -3741,7 +3741,7 @@ PKX	39.3033	116.2438	Beijing Daxing
 PKY	-2.2267	113.9442	Palangkaraya
 PKZ	15.1306	105.7814	Pakse                                   
 PLB	44.6875	-73.5245	PLATTSBURG
-PLD	10.2500	-85.4170	  Playa Sámara
+PLD	10.2500	-85.4170	  Playa Sï¿½mara
 PLH	50.4228	-4.1058	PLYMOUTH
 PLI	-18.7550	146.5817	PALM ISLAND
 PLJ	16.5330	-88.3500	Placencia                               
@@ -3833,7 +3833,7 @@ PRH	18.1286	100.1667	Phrae
 PRI	-4.3192	55.6916	Praslin Island
 PRM	37.1499	-8.5840	PORTIMAO
 PRN	42.5728	21.0358	Pristina
-PRQ	-26.7565	-60.4931	  Presidencia Roque Sáenz Peña
+PRQ	-26.7565	-60.4931	  Presidencia Roque Sï¿½enz Peï¿½a
 PRS	-9.6417	161.4253	  Parasi
 PRU	18.8239	95.2697	PYAY
 PRV	49.4259	17.4048	PREROV
@@ -4747,7 +4747,7 @@ TIZ	-5.8450	142.9480	Tari
 TJA	-21.5511	-64.7083	Tarija
 TJH	35.5129	134.7869	TAJIMA
 TJK	40.3125	36.3739	TOKAT
-TJL	-20.4516	-51.4102	Tr¨ºs Lagoas
+TJL	-20.4516	-51.4102	Trï¿½ï¿½s Lagoas
 TJM	57.1683	65.3167	Tyumen
 TJN	-15.8570	-142.2670	Takume
 TJQ	-2.7450	107.7531	Tanjung Pandan
@@ -5159,7 +5159,7 @@ VOT	-20.4233	-49.9881	VOTUPORANGA
 VOZ	51.8150	39.2300	Voronezh
 VPE	-17.0435	15.6838	Ondjiva
 VPG	-3.8599	39.7870	Vipingo
-VPN	65.7206	-14.8506	  Vopnafjörður
+VPN	65.7206	-14.8506	  Vopnafjï¿½rï¿½ur
 VPS	30.4833	-86.5253	Valparaiso Fort Walton Beach Apt
 VPY	-19.1485	33.4295	Chimoio                                 
 VQQ	30.2187	-81.8767	JACKSONVILLE CECIL FLD
@@ -5170,7 +5170,7 @@ VRC	13.5772	124.2164	Virac
 VRK	62.1711	27.8686	Varkaus
 VRN	45.3964	10.8881	Verona Villafranca Airport
 VRU	-26.9667	24.7333	VRYBURG
-VRY	67.6894	12.6819	  Værøy
+VRY	67.6894	12.6819	  Vï¿½rï¿½y
 VSA	17.9970	-92.8148	Villahermosa                            
 VSE	40.7255	-7.8890	VISEU
 VSG	48.4181	39.3761	Luhansk                                 
@@ -5515,7 +5515,7 @@ YKG	60.0272	-69.9992	Kangirsuk
 YKH	40.3227	122.2126	Yingkou Lanqi                 
 YKL	54.8053	-66.8053	Schefferville                           
 YKM	46.5682	-120.5441	Yakima Air Terminal
-YKO	37.3360	44.1401	Hakkari¡VYuksekova Selahaddin Eyyubi 
+YKO	37.3360	44.1401	Hakkariï¿½VYuksekova Selahaddin Eyyubi 
 YKQ	51.4736	-78.7581	Waskaganish                             
 YKS	62.0933	129.7717	Yakutsk
 YKT	52.6000	-128.5170	Klemtu

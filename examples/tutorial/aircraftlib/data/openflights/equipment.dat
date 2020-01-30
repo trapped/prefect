@@ -1,3 +1,4 @@
+equipment-id	equipment-name
 100	Fokker 100
 141	British Aerospace BAe 146-100
 142	British Aerospace BAe 146-200
@@ -30,7 +31,7 @@
 343	Airbus Industrie A340-300
 345	Airbus Industrie A340-500
 346	Airbus Industrie A340-600
-350     Airbus Industrie A350
+350	Airbus Industrie A350
 351	Airbus Industrie A350-1000
 359	Airbus Industrie A350-900
 380	Airbus Industrie A380

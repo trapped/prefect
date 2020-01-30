@@ -1,6 +1,5 @@
-# airline	from	to	codeshare	stops	equipment
-# Date: 2019-11-06
-#C7	MAO	CIZ		0	EMB
+airline	from	to	codeshare	stops	equipment
+C7	MAO	CIZ		0	EMB
 0B	BCM	BGY		0	735
 0B	BCM	BLQ		0	733 735 738
 0B	BCM	BRU		0	738
