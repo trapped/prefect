@@ -68,7 +68,7 @@ class Database:
         Base.metadata.create_all(self.engine)
         self.session = session_maker()
 
-    def add_aircraft_vectors(self, vectors: List[Dict[str, Any]]) -> None:
+    def add_live_aircraft_data(self, vectors: List[Dict[str, Any]]) -> None:
         for entry in vectors:
             vec = AircraftVector(
                 **{k: entry[k] for k in AircraftVector.__table__.columns.keys()}

@@ -83,7 +83,7 @@ def _capture_path(area: Area = None) -> str:
 FAILURE_COUNT = 0
 
 
-def fetch_aircraft_vectors(
+def fetch_live_aircraft_data(
     area: Area = None,
     offline: bool = True,
     capture: bool = True,

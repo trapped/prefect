@@ -1,7 +1,7 @@
 from aircraftlib import (
     Position,
     surrounding_area,
-    fetch_aircraft_vectors,
+    fetch_live_aircraft_data,
     Database,
     clean_vector,
     add_airline_info,
@@ -37,20 +37,20 @@ def main():
     print("fetching reference data...")
     ref_data = fetch_reference_data()
 
-    print("fetching live aircraft vectors...")
-    raw_aircraft_vectors = fetch_aircraft_vectors(area=area_surrounding_dulles)
+    print("fetching live aircraft data...")
+    raw_aircraft_data = fetch_live_aircraft_data(area=area_surrounding_dulles)
 
-    print("cleaning & transform vectors...")
-    aircraft_vectors = []
-    for raw_vector in raw_aircraft_vectors["states"]:
+    print("cleaning & transform aircraft data...")
+    live_aircraft_data = []
+    for raw_vector in raw_aircraft_data["states"]:
         vector = clean_vector(raw_vector)
         if vector:
             add_airline_info(vector, ref_data.airlines)
-            aircraft_vectors.append(vector)
+            live_aircraft_data.append(vector)
 
-    print("saving vectors...")
+    print("saving live aircraft data...")
     db = Database()
-    db.add_aircraft_vectors(aircraft_vectors)
+    db.add_live_aircraft_data(live_aircraft_data)
 
     print("saving reference data...")
     db.update_reference_data(ref_data)
@@ -60,3 +60,17 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# what is a vector
+# goto logs ???
+# small snippits of data
+
+# DE portion:
+# schedules
+# cache & resulthandlers --> this is not useful without a good remote store
+# parallelization (different executor)
+# triggers
+
+
+# DS portion:
+# mapping

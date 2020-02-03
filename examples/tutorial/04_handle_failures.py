@@ -3,7 +3,7 @@ from datetime import timedelta
 from aircraftlib import (
     Position,
     surrounding_area,
-    fetch_aircraft_vectors,
+    fetch_live_aircraft_data,
     Database,
     clean_vector,
     add_airline_info,
@@ -30,24 +30,24 @@ def extract_live_data(airport, radius, ref_data):
         )
         area = surrounding_area(airport_position, radius)
 
-    print("fetching live aircraft vectors...")
-    raw_aircraft_vectors = fetch_aircraft_vectors(area=area, simulate_failures=2)
+    print("fetching live aircraft data...")
+    raw_aircraft_data = fetch_live_aircraft_data(area=area, simulate_failures=2)
 
-    return raw_aircraft_vectors
+    return raw_aircraft_data
 
 
 @prefect.task
-def transform(raw_aircraft_vectors, ref_data):
-    print("cleaning & transform vectors...")
+def transform(raw_aircraft_data, ref_data):
+    print("cleaning & transform aircraft data...")
 
-    aircraft_vectors = []
-    for raw_vector in raw_aircraft_vectors["states"]:
+    live_aircraft_data = []
+    for raw_vector in raw_aircraft_data["states"]:
         vector = clean_vector(raw_vector)
         if vector:
             add_airline_info(vector, ref_data.airlines)
-            aircraft_vectors.append(vector)
+            live_aircraft_data.append(vector)
 
-    return aircraft_vectors
+    return live_aircraft_data
 
 
 @prefect.task
@@ -58,10 +58,10 @@ def load_reference_data(ref_data):
 
 
 @prefect.task
-def load_live_data(aircraft_vectors):
-    print("saving vectors...")
+def load_live_data(live_aircraft_data):
+    print("saving live aircraft data...")
     db = Database()
-    db.add_aircraft_vectors(aircraft_vectors)
+    db.add_live_aircraft_data(live_aircraft_data)
 
 
 def main():
