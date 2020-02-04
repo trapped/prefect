@@ -24,6 +24,30 @@ class Area:
         self.point1 = point1
         self.point2 = point2
 
+    # Bounding box surrounding the point at given coordinates,
+    # assuming local approximation of Earth surface as a sphere
+    # of radius given by WGS84
+    @classmethod
+    def bounding_box(cls, position: Position, radius_km: float) -> "Area":
+        lat = deg2rad(degrees=position.lat)
+        lon = deg2rad(degrees=position.long)
+        halfSide = 1000 * radius_km
+
+        # Radius of Earth at given latitude
+        radius = wgs84_earth_radius(lat=lat)
+        # Radius of the parallel at given latitude
+        pradius = radius * math.cos(lat)
+
+        latMin = lat - halfSide / radius
+        latMax = lat + halfSide / radius
+        lonMin = lon - halfSide / pradius
+        lonMax = lon + halfSide / pradius
+
+        return Area(
+            point1=Position(rad2deg(latMin), rad2deg(lonMin)),
+            point2=Position(rad2deg(latMax), rad2deg(lonMax)),
+        )
+
     def validate(self) -> None:
         for point in self.points:
             point.validate()
@@ -62,27 +86,3 @@ def wgs84_earth_radius(lat: float) -> float:
     Ad = WGS84_a * math.cos(lat)
     Bd = WGS84_b * math.sin(lat)
     return math.sqrt((An * An + Bn * Bn) / (Ad * Ad + Bd * Bd))
-
-
-# Bounding box surrounding the point at given coordinates,
-# assuming local approximation of Earth surface as a sphere
-# of radius given by WGS84
-def surrounding_area(position: Position, half_side_in_km: float) -> Area:
-    lat = deg2rad(degrees=position.lat)
-    lon = deg2rad(degrees=position.long)
-    halfSide = 1000 * half_side_in_km
-
-    # Radius of Earth at given latitude
-    radius = wgs84_earth_radius(lat=lat)
-    # Radius of the parallel at given latitude
-    pradius = radius * math.cos(lat)
-
-    latMin = lat - halfSide / radius
-    latMax = lat + halfSide / radius
-    lonMin = lon - halfSide / pradius
-    lonMax = lon + halfSide / pradius
-
-    return Area(
-        point1=Position(rad2deg(latMin), rad2deg(lonMin)),
-        point2=Position(rad2deg(latMax), rad2deg(lonMax)),
-    )

@@ -1,12 +1,4 @@
-from aircraftlib import (
-    Position,
-    surrounding_area,
-    fetch_live_aircraft_data,
-    Database,
-    clean_vector,
-    add_airline_info,
-    fetch_reference_data,
-)
+import aircraftlib as aclib
 
 # pull data, store to DB
 # pull data periodically (hourly), append to DB
@@ -30,26 +22,28 @@ from aircraftlib import (
 
 def main():
     # Get the live AC vector data around Dulles airport
-    dulles_airport_position = Position(lat=38.9519444444, long=-77.4480555556)
-    radius_km = 200
-    area_surrounding_dulles = surrounding_area(dulles_airport_position, radius_km)
+    dulles_airport_position = aclib.Position(lat=38.9519444444, long=-77.4480555556)
+    print(aclib.Area.bounding_box)
+    area_surrounding_dulles = aclib.Area.bounding_box(
+        position=dulles_airport_position, radius_km=200
+    )
 
     print("fetching reference data...")
-    ref_data = fetch_reference_data()
+    ref_data = aclib.fetch_reference_data()
 
     print("fetching live aircraft data...")
-    raw_aircraft_data = fetch_live_aircraft_data(area=area_surrounding_dulles)
+    raw_aircraft_data = aclib.fetch_live_aircraft_data(area=area_surrounding_dulles)
 
     print("cleaning & transform aircraft data...")
     live_aircraft_data = []
-    for raw_vector in raw_aircraft_data["states"]:
-        vector = clean_vector(raw_vector)
+    for raw_vector in raw_aircraft_data:
+        vector = aclib.clean_vector(raw_vector)
         if vector:
-            add_airline_info(vector, ref_data.airlines)
+            aclib.add_airline_info(vector, ref_data.airlines)
             live_aircraft_data.append(vector)
 
     print("saving live aircraft data...")
-    db = Database()
+    db = aclib.Database()
     db.add_live_aircraft_data(live_aircraft_data)
 
     print("saving reference data...")

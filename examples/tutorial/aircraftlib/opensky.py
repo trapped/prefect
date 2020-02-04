@@ -5,7 +5,7 @@ import json
 import pathlib
 import struct
 import binascii
-from typing import Dict, Any, Optional
+from typing import Any, Optional, List, Dict
 
 import requests
 
@@ -88,7 +88,7 @@ def fetch_live_aircraft_data(
     offline: bool = True,
     capture: bool = True,
     simulate_failures: int = 0,
-) -> Dict[str, Any]:
+) -> List[Any]:
     global FAILURE_COUNT
     if FAILURE_COUNT < simulate_failures:
         FAILURE_COUNT += 1
@@ -118,4 +118,4 @@ def fetch_live_aircraft_data(
         with open(capture_path, "w") as capture_file:
             json.dump(result, capture_file)
 
-    return result
+    return result["states"]
