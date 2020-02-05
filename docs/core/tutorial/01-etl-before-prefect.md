@@ -1,8 +1,8 @@
 # ETL: Before Prefect
 
-To better explore the features of Prefect, Let's jump into an ETL ("extract, transform, load") example that doesn't use Prefect.
+To better explore the features of Prefect, let's jump into an ETL ("extract, transform, load") example that doesn't use Prefect.
 
-In this case, we are trying to fetch and store information about live aircraft information to use in a future analysis. This future analysis requires pulling, cleaning, and merging data from multiple sources, in this case "live" aircraft data (positional information) and "reference" data (airport locations, flights, route plan information).
+In this case, we are trying to fetch and store information about live aircraft information to use in a future analysis. This future analysis requires pulling, cleaning, and merging data from multiple sources. In this case we are using "live" aircraft data (positional information) and "reference" data (airport locations, flights, route plan information).
 
 ```python
 import aircraftlib as aclib
@@ -41,7 +41,7 @@ python 01_etl.py
 
 :::
 
-The advantages of the above code is that it is simple to read. However, it's simplicity is matched only by the number of disadvantags. The first and foremost, the workflow is strictly lienar:
+The advantages of the above code is that it is simple to read. However, it's simplicity is matched only by the number of disadvantages. First and foremost, the workflow is strictly linear:
 
 ![Linear ETL](/prefect-tutorial-etl-linear.png)
 
