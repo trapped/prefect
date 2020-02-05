@@ -1,22 +1,12 @@
 from datetime import timedelta
-
-from aircraftlib import (
-    Position,
-    surrounding_area,
-    fetch_live_aircraft_data,
-    Database,
-    clean_vector,
-    add_airline_info,
-    fetch_reference_data,
-)
-
-from prefect import Flow, task, Parameter
+import aircraftlib as aclib
+import prefect
 
 
 @task(max_retries=3, retry_delay=timedelta(seconds=1))
 def extract_reference_data():
     print("fetching reference data...")
-    return fetch_reference_data()
+    return aclib.fetch_reference_data()
 
 
 @task(max_retries=3, retry_delay=timedelta(seconds=1))
@@ -25,13 +15,13 @@ def extract_live_data(airport, radius, ref_data):
     area = None
     if airport:
         airport_data = ref_data.airports[airport]
-        airport_position = Position(
+        airport_position = aclib.Position(
             lat=float(airport_data["latitude"]), long=float(airport_data["longitude"])
         )
-        area = surrounding_area(airport_position, radius)
+        area = aclib.bounding_box(airport_position, radius)
 
     print("fetching live aircraft data...")
-    raw_aircraft_data = fetch_live_aircraft_data(area=area, simulate_failures=2)
+    raw_aircraft_data = aclib.fetch_live_aircraft_data(area=area, simulate_failures=2)
 
     return raw_aircraft_data
 
@@ -41,10 +31,10 @@ def transform(raw_aircraft_data, ref_data):
     print("cleaning & transform aircraft data...")
 
     live_aircraft_data = []
-    for raw_vector in raw_aircraft_data["states"]:
-        vector = clean_vector(raw_vector)
+    for raw_vector in raw_aircraft_data:
+        vector = aclib.clean_vector(raw_vector)
         if vector:
-            add_airline_info(vector, ref_data.airlines)
+            aclib.add_airline_info(vector, ref_data.airlines)
             live_aircraft_data.append(vector)
 
     return live_aircraft_data
@@ -53,14 +43,14 @@ def transform(raw_aircraft_data, ref_data):
 @task
 def load_reference_data(ref_data):
     print("saving reference data...")
-    db = Database()
+    db = aclib.Database()
     db.update_reference_data(ref_data)
 
 
 @task
 def load_live_data(live_aircraft_data):
     print("saving live aircraft data...")
-    db = Database()
+    db = aclib.Database()
     db.add_live_aircraft_data(live_aircraft_data)
 
 

@@ -23,8 +23,7 @@ import aircraftlib as aclib
 def main():
     # Get the live AC vector data around Dulles airport
     dulles_airport_position = aclib.Position(lat=38.9519444444, long=-77.4480555556)
-    print(aclib.Area.bounding_box)
-    area_surrounding_dulles = aclib.Area.bounding_box(
+    area_surrounding_dulles = aclib.bounding_box(
         position=dulles_airport_position, radius_km=200
     )
 

@@ -113,9 +113,9 @@ def fetch_live_aircraft_data(
         with open(capture_path, "r") as capture_file:
             return json.load(capture_file)
 
-    result = _api_request_json("states/all", options=options)
+    result = _api_request_json("states/all", options=options)["states"]
     if capture:
         with open(capture_path, "w") as capture_file:
             json.dump(result, capture_file)
 
-    return result["states"]
+    return result

@@ -19,34 +19,34 @@ class Position:
             raise ValueError("Bad longitude given ({})".format(self.long))
 
 
+# Bounding box surrounding the point at given coordinates,
+# assuming local approximation of Earth surface as a sphere
+# of radius given by WGS84
+def bounding_box(position: Position, radius_km: float) -> "Area":
+    lat = deg2rad(degrees=position.lat)
+    lon = deg2rad(degrees=position.long)
+    halfSide = 1000 * radius_km
+
+    # Radius of Earth at given latitude
+    radius = wgs84_earth_radius(lat=lat)
+    # Radius of the parallel at given latitude
+    pradius = radius * math.cos(lat)
+
+    latMin = lat - halfSide / radius
+    latMax = lat + halfSide / radius
+    lonMin = lon - halfSide / pradius
+    lonMax = lon + halfSide / pradius
+
+    return Area(
+        point1=Position(rad2deg(latMin), rad2deg(lonMin)),
+        point2=Position(rad2deg(latMax), rad2deg(lonMax)),
+    )
+
+
 class Area:
     def __init__(self, point1: Position, point2: Position):
         self.point1 = point1
         self.point2 = point2
-
-    # Bounding box surrounding the point at given coordinates,
-    # assuming local approximation of Earth surface as a sphere
-    # of radius given by WGS84
-    @classmethod
-    def bounding_box(cls, position: Position, radius_km: float) -> "Area":
-        lat = deg2rad(degrees=position.lat)
-        lon = deg2rad(degrees=position.long)
-        halfSide = 1000 * radius_km
-
-        # Radius of Earth at given latitude
-        radius = wgs84_earth_radius(lat=lat)
-        # Radius of the parallel at given latitude
-        pradius = radius * math.cos(lat)
-
-        latMin = lat - halfSide / radius
-        latMax = lat + halfSide / radius
-        lonMin = lon - halfSide / pradius
-        lonMax = lon + halfSide / pradius
-
-        return Area(
-            point1=Position(rad2deg(latMin), rad2deg(lonMin)),
-            point2=Position(rad2deg(latMax), rad2deg(lonMax)),
-        )
 
     def validate(self) -> None:
         for point in self.points:
