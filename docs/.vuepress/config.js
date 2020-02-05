@@ -35,7 +35,7 @@ module.exports = {
         ga: 'UA-115585378-1'
       }
     ],
-    ["vuepress-plugin-code-copy", true],
+    ['vuepress-plugin-code-copy', true],
     'vuepress-plugin-element-tabs',
     [
       'vuepress-plugin-selected-text-popup',
@@ -65,8 +65,8 @@ module.exports = {
         link: '/core/'
       },
       {
-        text: "Prefect Cloud",
-        link: "/cloud/dataflow"
+        text: 'Prefect Cloud',
+        link: '/cloud/dataflow'
       },
       {
         text: 'API Reference',
@@ -85,7 +85,7 @@ module.exports = {
           {
             text: 'Legacy',
             link: 'https://docs-legacy.prefect.io'
-          },
+          }
         ]
       }
     ],
@@ -150,12 +150,19 @@ module.exports = {
       '/cloud/': [{
           title: 'Welcome',
           collapsable: false,
-          children: ["dataflow", "faq"]
+          children: ['dataflow', 'faq']
         },
         {
-          title: "Tutorial",
+          title: 'Tutorial',
           collapsable: false,
-          children: ["tutorial/configure", "tutorial/first", "tutorial/multiple", "tutorial/docker", "tutorial/k8s", "tutorial/next-steps"]
+          children: [
+            'tutorial/configure',
+            'tutorial/first',
+            'tutorial/multiple',
+            'tutorial/docker',
+            'tutorial/k8s',
+            'tutorial/next-steps'
+          ]
         },
         {
           title: 'Cloud Concepts',
@@ -166,13 +173,13 @@ module.exports = {
           title: 'Cloud Execution',
           collapsable: true,
           children: [
-            "execution/overview",
-            "execution/storage_options",
-            "execution/remote_environment",
-            "execution/dask_k8s_environment",
-            "execution/k8s_job_environment",
-            "execution/fargate_task_environment",
-            "execution/custom_environment",
+            'execution/overview',
+            'execution/storage_options',
+            'execution/remote_environment',
+            'execution/dask_k8s_environment',
+            'execution/k8s_job_environment',
+            'execution/fargate_task_environment',
+            'execution/custom_environment'
           ]
         },
         {
@@ -189,7 +196,13 @@ module.exports = {
         {
           title: 'Deployment Recipes',
           collapsable: true,
-          children: ["recipes/deployment", "recipes/configuring_storage", "recipes/multi_flow_storage", "recipes/k8s_dask", "recipes/k8s_docker_sidecar", ]
+          children: [
+            'recipes/deployment',
+            'recipes/configuring_storage',
+            'recipes/multi_flow_storage',
+            'recipes/k8s_dask',
+            'recipes/k8s_docker_sidecar'
+          ]
         }
       ],
       '/core/': [

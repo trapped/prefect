@@ -2,7 +2,29 @@
 
 To better explore the features of Prefect, let's jump into an ETL ("extract, transform, load") example that doesn't use Prefect.
 
-In this case, we are trying to fetch and store information about live aircraft information to use in a future analysis. This future analysis requires pulling, cleaning, and merging data from multiple sources. In this case we are using "live" aircraft data (positional information) and "reference" data (airport locations, flights, route plan information).
+::: tip Follow along in the Terminal
+
+Grab the tutorial code:
+
+```
+git clone --depth 1 https://github.com/PrefectHQ/prefect.git
+cd prefect/examples/tutorial
+pip install -r requirements.txt
+```
+
+Run this example:
+
+```
+python 01_etl.py
+```
+
+:::
+
+## "Aircraft ETL" Example
+
+In this tutorial, we are trying to fetch and store information about live aircraft information to use in a future analysis. This future analysis requires pulling, cleaning, and merging data from multiple sources. In this case we are using "live" aircraft data (positional information) and "reference" data (airport locations, flights, route plan information).
+
+Before we bring any Prefect concepts into the mix, let's start with a reference implementation that solves our problem:
 
 ```python
 import aircraftlib as aclib
@@ -30,24 +52,6 @@ db.update_reference_data(ref_data)
 
 ```
 
-::: tip Follow along in the Terminal
-
-Grab the tutorial code:
-
-```shell
-git clone --depth 1 https://github.com/PrefectHQ/prefect.git
-cd prefect/examples/tutorial
-pip install -r requirements.txt
-```
-
-Run this example:
-
-```shell
-python 01_etl.py
-```
-
-:::
-
 The advantages of the above code is that it is simple to read. However, it's simplicity is matched only by the number of disadvantages. First and foremost, the workflow is strictly linear:
 
 ![Linear ETL](/prefect-tutorial-etl-linear.png)
@@ -65,4 +69,8 @@ Additionally, an unnecessarily-linear flow introduces a second problem: workflow
 
 These are the things that we at Prefect refer to "negative engineering", or the inherent precausions you have to take to ensure that your workflow will be well-behaved. The code above has very little (if any) of these precautions.
 
+::: warning Up Next!
+
 Next, we'll take our ETL example and use Prefect to improve the behavior of our workflow.
+
+:::

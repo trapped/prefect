@@ -2,6 +2,24 @@
 
 Let's improve the overall structure of our workflow by using Prefect to encapsulate our code.
 
+::: tip Follow along in the Terminal
+
+Grab the tutorial code:
+
+```
+git clone --depth 1 https://github.com/PrefectHQ/prefect.git
+cd prefect/examples/tutorial
+pip install -r requirements.txt
+```
+
+Run this example:
+
+```
+python 02_etl_flow.py
+```
+
+:::
+
 ## It's E, T, L, not ETL
 
 Prefect's smallest unit of work is a Python function; so our first order of business is to rework our example into functions.
@@ -61,7 +79,7 @@ Now that we have appropriately sized functions and an idea of how these function
 
 **First step**: decorate any function that you would like Prefect to run with `prefect.task`:
 
-```python{4}
+``` python{4-10}
 from prefect import task, Flow
 
 @task
@@ -93,7 +111,7 @@ def load_live_data(transformed_data):
     ...
 ```
 
-**Second step**: specify data dependencies between tasks within a `prefect.Flow` context:
+**Second step**: specify data and task dependencies within a `prefect.Flow` context:
 
 ```python
 # ...task definitions above
@@ -112,9 +130,9 @@ Note, this does not execute your flow, this allows Prefect to reason about depen
 
 ![Graph ETL](/prefect-tutorial-etl-dataflow.png)
 
-A large improvement over our original implementation!
+A huge improvement over our original implementation!
 
-**Third step**: execute the flow!
+**Third step**: execute the Flow!
 
 ```python
 # ...flow definition above
@@ -122,20 +140,10 @@ A large improvement over our original implementation!
 flow.run()
 ```
 
-::: tip Follow along in the Terminal
+...
 
-Grab the tutorial code:
+::: warning Up Next!
 
-```shell
-git clone --depth 1 https://github.com/PrefectHQ/prefect.git
-cd prefect/examples/tutorial
-pip install -r requirements.txt
-```
-
-Run this example:
-
-```shell
-python 02_etl_flow.py
-```
+Let's parameterize our Flow to make it more reusable.
 
 :::
