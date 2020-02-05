@@ -12,8 +12,7 @@ def extract_reference_data():
 def extract_live_data():
     # Get the live AC vector data around Dulles airport
     dulles_airport_position = aclib.Position(lat=38.9519444444, long=-77.4480555556)
-    radius_km = 200
-    area_surrounding_dulles = aclib.bounding_box(dulles_airport_position, radius_km)
+    area_surrounding_dulles = aclib.bounding_box(dulles_airport_position, radius_km=200)
 
     print("fetching live aircraft data...")
     raw_aircraft_data = aclib.fetch_live_aircraft_data(area=area_surrounding_dulles)

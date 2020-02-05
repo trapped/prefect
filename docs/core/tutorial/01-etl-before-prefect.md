@@ -32,10 +32,17 @@ db.update_reference_data(ref_data)
 
 ::: tip Follow along in the Terminal
 
-```
+Grab the tutorial code:
+
+```shell
 git clone --depth 1 https://github.com/PrefectHQ/prefect.git
 cd prefect/examples/tutorial
 pip install -r requirements.txt
+```
+
+Run this example:
+
+```shell
 python 01_etl.py
 ```
 
