@@ -10,16 +10,16 @@ from aircraftlib import (
     fetch_reference_data,
 )
 
-import prefect
+from prefect import Flow, task, Parameter
 
 
-@prefect.task(max_retries=3, retry_delay=timedelta(seconds=1))
+@task(max_retries=3, retry_delay=timedelta(seconds=1))
 def extract_reference_data():
     print("fetching reference data...")
     return fetch_reference_data()
 
 
-@prefect.task(max_retries=3, retry_delay=timedelta(seconds=1))
+@task(max_retries=3, retry_delay=timedelta(seconds=1))
 def extract_live_data(airport, radius, ref_data):
     # Get the live AC vector data around the given airport (or none)
     area = None
@@ -36,7 +36,7 @@ def extract_live_data(airport, radius, ref_data):
     return raw_aircraft_data
 
 
-@prefect.task
+@task
 def transform(raw_aircraft_data, ref_data):
     print("cleaning & transform aircraft data...")
 
@@ -50,14 +50,14 @@ def transform(raw_aircraft_data, ref_data):
     return live_aircraft_data
 
 
-@prefect.task
+@task
 def load_reference_data(ref_data):
     print("saving reference data...")
     db = Database()
     db.update_reference_data(ref_data)
 
 
-@prefect.task
+@task
 def load_live_data(live_aircraft_data):
     print("saving live aircraft data...")
     db = Database()
@@ -65,9 +65,9 @@ def load_live_data(live_aircraft_data):
 
 
 def main():
-    with prefect.Flow("etl") as flow:
-        airport = prefect.Parameter("airport", default="IAD")
-        radius = prefect.Parameter("radius", default=200)
+    with Flow("etl") as flow:
+        airport = Parameter("airport", default="IAD")
+        radius = Parameter("radius", default=200)
 
         reference_data = extract_reference_data()
         live_data = extract_live_data(airport, radius, reference_data)

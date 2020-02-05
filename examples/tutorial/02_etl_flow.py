@@ -8,16 +8,16 @@ from aircraftlib import (
     fetch_reference_data,
 )
 
-import prefect
+from prefect import Flow, task
 
 
-@prefect.task
+@task
 def extract_reference_data():
     print("fetching reference data...")
     return fetch_reference_data()
 
 
-@prefect.task
+@task
 def extract_live_data():
     # Get the live AC vector data around Dulles airport
     dulles_airport_position = Position(lat=38.9519444444, long=-77.4480555556)
@@ -30,7 +30,7 @@ def extract_live_data():
     return raw_aircraft_data
 
 
-@prefect.task
+@task
 def transform(raw_aircraft_data, ref_data):
     print("cleaning & transform aircraft data...")
 
@@ -44,14 +44,14 @@ def transform(raw_aircraft_data, ref_data):
     return live_aircraft_data
 
 
-@prefect.task
+@task
 def load_reference_data(ref_data):
     print("saving reference data...")
     db = Database()
     db.update_reference_data(ref_data)
 
 
-@prefect.task
+@task
 def load_live_data(live_aircraft_data):
     print("saving live aircraft data...")
     db = Database()
@@ -59,7 +59,7 @@ def load_live_data(live_aircraft_data):
 
 
 def main():
-    with prefect.Flow("etl") as flow:
+    with Flow("etl") as flow:
         reference_data = extract_reference_data()
         live_data = extract_live_data()
 
