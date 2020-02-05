@@ -1,6 +1,6 @@
 from datetime import timedelta
 import aircraftlib as aclib
-import prefect
+from prefect import task, Flow, Parameter
 
 
 @task(max_retries=3, retry_delay=timedelta(seconds=1))
